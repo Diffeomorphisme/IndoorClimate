@@ -1,0 +1,30 @@
+version: '3'
+services:
+  my_component:
+    # Here you can specify an env-file with variables
+    # that can be used in the docker-container,
+    # BUT these variables can not be used here in the
+    # docker-compose using ${...} UNLESS it is a file named
+    # ".env". This file (in the same directory) is always
+    # loaded into the docker-compose, but not into the
+    # docker-containers unless the variables are mapped in the
+    # environment option below or using the env_file option here.
+    env_file: .env
+    container_name: IndoorClimateStation
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    environment: # specify the env-variables here
+      # secret ones in .env file or system
+      ENV_DB_HOST: ${ENV_DB_HOST}
+      ENV_DB_NAME: ${ENV_DB_NAME}
+      ENV_DB_USER: ${ENV_DB_USER}
+      ENV_DB_PWD: ${ENV_DB_PWD}
+
+      # and public ones can be hardcoded
+      CONTAINER_RUNNING: True
+      # sometimes the console won't show print messages,
+      # using PYTHONUNBUFFERED: 1 can fix this
+      PYTHONUNBUFFERED: 1

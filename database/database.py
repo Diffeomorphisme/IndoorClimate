@@ -27,17 +27,17 @@ class Database:
 
     def fetch_api_keys(self):
         data = self._request_data("SELECT apiAPIKey FROM tblAPIKey")
-        print(data)
         curated_data = [item[0] for item in data]
         return curated_data
 
     def fetch_sensor_log(self, max_rows=24):
         data = self._request_data(
-            f"SELECT Location, Time, Temperature, Humidity "
+            f"SELECT Location, Time, Temperature, Humidity, Battery "
             f"FROM (SELECT tblSensor.senPlacement AS Location, "
             f"logtblClimateData.cliTime AS Time, "
             f"logtblClimateData.cliTemperature AS Temperature, "
             f"logtblClimateData.cliHumidity as Humidity, "
+            f"logtblClimateData.cliBattery as Battery, "
             f"row_number() OVER (PARTITION BY tblSensor.senPlacement "
             f"ORDER BY logtblClimateData.cliTime DESC) AS row "
             f"FROM logtblClimateData "
@@ -70,14 +70,15 @@ class Database:
             if conn is not None and conn.is_connected():
                 conn.close()
 
-    def insert_sensor_data(self, api_key, datetime, temperature, humidity):
+    def insert_sensor_data(
+            self, api_key, datetime, temperature, humidity, battery):
         return self._insert_data(
             f"INSERT INTO logtblClimateData "
-            f"(cliSensorID, cliTime, cliTemperature, cliHumidity) "
+            f"(cliSensorID, cliTime, cliTemperature, cliHumidity, cliBattery) "
             f"VALUES ("
             f"(SELECT apiSensorID FROM tblAPIKey "
             f"WHERE apiAPIKey = '{api_key}'), "
-            f"'{datetime}', {temperature}, {humidity}) ")
+            f"'{datetime}', {temperature}, {humidity}, {battery}) ")
 
     def _insert_data(self, mysql_request):
         if type(mysql_request) is not str:

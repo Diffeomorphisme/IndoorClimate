@@ -12,13 +12,14 @@ class Sensor(BaseModel):
     temperature: float
     humidity: float
     datetime: str
+    battery: float
 
 
 app = FastAPI()
 database = db.Database(host=config.database_credentials["host"],
-                           name=config.database_credentials["name"],
-                           user=config.database_credentials["user"],
-                           pwd=config.database_credentials["pwd"])
+                       name=config.database_credentials["name"],
+                       user=config.database_credentials["user"],
+                       pwd=config.database_credentials["pwd"])
 
 
 @app.get("/time")
@@ -36,7 +37,8 @@ def add_sensor_data(sensor: Sensor):
             api_key=sensor.apiKey,
             datetime=sensor.datetime,
             temperature=sensor.temperature,
-            humidity=sensor.humidity)
+            humidity=sensor.humidity,
+            battery=sensor.battery)
         if database_insert_success:
             response["Status"] = "OK"
             return response
@@ -57,7 +59,8 @@ def get_sensors_data():
     for field in log:
         field_data = {"time": field[1].strftime("%Y/%m/%d, %H:%M:%S"),
                       "temperature": field[2],
-                      "humidity": field[3]}
+                      "humidity": field[3],
+                      "battery": field[4]}
         (response.setdefault(field[0], [field_data])
          if field[0] not in response.keys()
          else response[field[0]].append(field_data))
